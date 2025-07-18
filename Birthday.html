@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Happy Birthday</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Comic Sans MS', cursive;
+      background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .page {
+      display: none;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .page.active {
+      display: flex;
+    }
+
+    h1 {
+      font-size: 4em;
+      color: #fff;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 10px #fff, 0 0 20px #ff00de;
+      }
+      to {
+        text-shadow: 0 0 20px #fff, 0 0 30px #00ffea;
+      }
+    }
+
+    button {
+      margin-top: 30px;
+      padding: 15px 35px;
+      font-size: 1.5em;
+      background: #fff;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      color: #444;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      background: #ffe6f0;
+      transform: scale(1.05);
+    }
+
+    /* Cake Styles */
+    .cake-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin-bottom: 20px;
+    }
+
+    .plate {
+      width: 220px;
+      height: 20px;
+      background: #ddd;
+      border-radius: 50%;
+      position: absolute;
+      bottom: 0;
+      left: -10px;
+      z-index: 1;
+    }
+
+    .cake {
+      position: absolute;
+      bottom: 20px;
+      width: 200px;
+      height: 120px;
+      background: #f39c12;
+      border-radius: 15px 15px 5px 5px;
+      box-shadow: inset 0 -10px 0 #d35400;
+    }
+
+    .icing {
+      position: absolute;
+      top: -20px;
+      width: 100%;
+      height: 40px;
+      background: pink;
+      border-radius: 50% / 50%;
+      z-index: 2;
+    }
+
+    .candle {
+      position: absolute;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 10px;
+      height: 40px;
+      background: red;
+      border-radius: 2px;
+    }
+
+    .flame {
+      width: 15px;
+      height: 15px;
+      background: yellow;
+      border-radius: 50%;
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: flicker 0.3s infinite;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 1; transform: scale(1) translateX(-50%); }
+      50% { opacity: 0.7; transform: scale(1.2) translateX(-50%); }
+      100% { opacity: 1; transform: scale(1) translateX(-50%); }
+    }
+
+    .popper {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: gold;
+      border-radius: 50%;
+      animation: pop 1s forwards;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0); }
+      100% { transform: scale(2) translateY(-100px); opacity: 0; }
+    }
+
+    h2 {
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Page 1 -->
+<div class="page active" id="page1">
+  <h1>🎉 Happy Birthday Shreyaaa❤️! 🎉</h1>
+  <button onclick="goToPage2()">Celebrate</button>
+</div>
+
+<!-- Page 2 -->
+<div class="page" id="page2">
+  <div class="cake-container">
+    <div class="plate"></div>
+    <div class="cake">
+      <div class="icing"></div>
+      <div class="candle">
+        <div class="flame" id="flame"></div>
+      </div>
+    </div>
+  </div>
+  <h2>Blow on the screen 🌬️🎂</h2>
+</div>
+
+<script>
+  function goToPage2() {
+    document.getElementById("page1").classList.remove("active");
+    document.getElementById("page2").classList.add("active");
+    startMicDetection();
+  }
+
+  function startMicDetection() {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const mic = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      mic.connect(analyser);
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+      function detectBlow() {
+        analyser.getByteFrequencyData(dataArray);
+        let volume = dataArray.reduce((a, b) => a + b) / dataArray.length;
+
+        if (volume > 40) {
+          blowCandle();
+        } else {
+          requestAnimationFrame(detectBlow);
+        }
+      }
+
+      detectBlow();
+    });
+  }
+
+  function blowCandle() {
+    const flame = document.getElementById("flame");
+    if (flame) flame.remove();
+
+    for (let i = 0; i < 30; i++) {
+      const popper = document.createElement("div");
+      popper.className = "popper";
+      popper.style.left = `${Math.random() * window.innerWidth}px`;
+      popper.style.top = `${Math.random() * window.innerHeight}px`;
+      popper.style.background = `hsl(${Math.random() * 360}, 100%, 60%)`;
+      document.body.appendChild(popper);
+      setTimeout(() => popper.remove(), 1000);
+    }
+  }
+</script>
+</body>
+</html>
